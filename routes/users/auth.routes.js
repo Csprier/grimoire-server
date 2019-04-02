@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
 
 // SCHEMA
-const User = require('../models/user');
+const User = require('../../models/user');
 
 const { JWT_SECRET, JWT_EXPIRY } = require('../../config');
 

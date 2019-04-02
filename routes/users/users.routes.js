@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const passport = require('passport');
-const User = require('../models/user');
+const User = require('../../models/user.js');
 
 const router = express.Router();
 
@@ -194,7 +194,7 @@ router.get('/:userId', (req, res, next) => {
 });
 
 /* =================================================================================== */
-// PUT ADMIN BY ID
+// PUT USER BY ID
 router.put('/:userId', (req, res, next) => {
 	const { userId } = req.params;
 
