@@ -47,7 +47,7 @@ passport.use(jwtStrategy);
 // app.use('/api/tags', tagsRouter);
 
 app.use('/api/users', usersRouter);
-app.use('/api', authRouter);
+app.use('/api/auth', authRouter);
 
 // ===============================================================================================
 // Catch-all 404
