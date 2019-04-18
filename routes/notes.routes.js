@@ -193,6 +193,7 @@ router.put('/:id', (req, res, next) => {
     });
 });
 
+/* ========== PATCH/UPDATE A SINGLE ITEM ========== */
 router.patch('/:id', (req, res, next) => {
   const { id } = req.params;
   const { title, content, folderId, tags } = req.body;
