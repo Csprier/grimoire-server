@@ -14,9 +14,9 @@ const seedUsers = require('../db/seed/users');
 mongoose.connect(MONGODB_URI)
   .then(() => mongoose.connection.db.dropDatabase())
   .then(() => {
-    return Promise.all(seedUsers.map( user => User.hashPassword(user.password)));
+    return Promise.all(seedUsers.map(user => User.hashPassword(user.password)));
   })
-  .then( digests => {
+  .then(digests => {
     seedUsers.forEach((user, i) => user.password = digests[i]);
 
     return Promise.all([
