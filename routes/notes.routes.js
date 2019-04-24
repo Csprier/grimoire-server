@@ -36,6 +36,12 @@ function validateTagIds(tags, userId) {
   }
   return Tag.find({ $and: [{ _id: { $in: tags }, userId }] })
     .then(results => {
+      /**
+       * NEED TO CHECK IF THE TAGS EXIST
+       * IF THEY DO, DO NOTHING AND CREATE THE NOTE WITH THE DATA IT HAS
+       * ELSE, CREATE THE TAGS AND PUT THEM IN THE DATABASE BEFORE COMPLETING THE NOTE COMPLETION
+       */
+      console.log('tags', tags);
       if (tags.length !== results.length) {
         const err = new Error('The `tags` contains an invalid id');
         err.status = 400;
