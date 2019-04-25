@@ -26,14 +26,17 @@ function validateFolderId(folderId, userId) {
 }
 
 function validateTagIds(tags, userId) {
-  if (tags === undefined) {
+  if (tags === undefined) { // If tags is undefined, there are no tags and resolve the Promise.
     return Promise.resolve();
   }
-  if (!Array.isArray(tags)) {
+
+  if (!Array.isArray(tags)) { // Tags must be an array
     const err = new Error('The `tags` must be an array');
     err.status = 400;
     return Promise.reject(err);
   }
+
+  
   return Tag.find({ $and: [{ _id: { $in: tags }, userId }] })
     .then(results => {
       /**
