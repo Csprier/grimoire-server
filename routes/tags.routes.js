@@ -51,21 +51,24 @@ router.get('/:id', (req, res, next) => {
 
 /* ========== POST/CREATE AN ITEM ========== */
 router.post('/', (req, res, next) => {
-  const { name } = req.body;
-  const userId = req.user.id;
-
-  const newTag = { name, userId };
+  console.log('req.body', req.body)
+  const tagArray = req.body.tagArray;
+  const userId = req.body.userId;
 
   /***** Never trust users - validate input *****/
-  if (!name) {
-    const err = new Error('Missing `name` in request body');
-    err.status = 400;
-    return next(err);
-  }
-
-  Tag.create(newTag)
+  // if (!name) {
+  //   const err = new Error('Missing `name` in request body');
+  //   err.status = 400;
+  //   return next(err);
+  // }
+  console.log('tagArray', tagArray, 'userId', userId);
+  let tagPromiseArray = tagArray.map(tag => Tag.create({ userId: userId, name: tag }))
+  Promise.all(tagPromiseArray)
+  // Tag.create({ userId: userId, name: tagArray[0] })
     .then(result => {
-      res.location(`${req.originalUrl}/${result.id}`).status(201).json(result);
+      console.log('--------------------', result, '--------------------');
+      res.json(result);
+      // res.location(`${req.originalUrl}/${result.id}`).status(201).json(result);
     })
     .catch(err => {
       if (err.code === 11000) {
