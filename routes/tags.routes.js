@@ -51,21 +51,23 @@ router.get('/:id', (req, res, next) => {
 
 /* ========== POST/CREATE AN ITEM ========== */
 router.post('/', (req, res, next) => {
-  const { name } = req.body;
-  const userId = req.user.id;
-
-  const newTag = { name, userId };
-
+  console.log('tag post req.body', req.body);
+  const tagArray = req.body.tags;
+  const userId = req.body.userId;
+console.log('tag post tagArray', tagArray)
   /***** Never trust users - validate input *****/
-  if (!name) {
-    const err = new Error('Missing `name` in request body');
-    err.status = 400;
-    return next(err);
-  }
-
-  Tag.create(newTag)
+  // if (!name) {
+  //   const err = new Error('Missing `name` in request body');
+  //   err.status = 400;
+  //   return next(err);
+  // }
+  // console.log('tagArray', tagArray, 'userId', userId);
+  let tagPromiseArray = tagArray.map(tag => Tag.create({ userId: userId, name: tag }))
+  Promise.all(tagPromiseArray)
     .then(result => {
-      res.location(`${req.originalUrl}/${result.id}`).status(201).json(result);
+      console.log('--------------------', result, '--------------------');
+      res.json(result);
+      // res.location(`${req.originalUrl}/${result.id}`).status(201).json(result);
     })
     .catch(err => {
       if (err.code === 11000) {
@@ -78,7 +80,8 @@ router.post('/', (req, res, next) => {
 
 /* ========== PUT/UPDATE A SINGLE ITEM ========== */
 router.put('/:id', (req, res, next) => {
-  const { id } = req.params;
+  console.log(req.params);
+  const { _id } = req.params;
   const { name } = req.body;
   const userId = req.user.id;
 
@@ -97,7 +100,7 @@ router.put('/:id', (req, res, next) => {
 
   const updateTag = { name, userId };
 
-  Tag.findByIdAndUpdate(id, updateTag, { new: true })
+  Tag.findByIdAndUpdate(_id, updateTag, { new: true })
     .then(result => {
       if (result) {
         res.json(result);
