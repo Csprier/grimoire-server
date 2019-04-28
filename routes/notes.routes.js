@@ -7,25 +7,32 @@ const Folder = require('../models/folder');
 const Tag = require('../models/tag');
 
 function validateFolderId(folderId, userId) {
-  if (folderId === undefined) {
+  console.log('ValidateFolderId', folderId);
+  if (folderId === undefined || '') {
     return Promise.resolve();
   }
+
   if (!mongoose.Types.ObjectId.isValid(folderId)) {
     const err = new Error('The `folderId` is not valid');
     err.status = 400;
     return Promise.reject(err);
   }
-  return Folder.count({ _id: folderId, userId })
+
+  return Folder.countDocuments({ _id: folderId, userId })
     .then(count => {
       if (count === 0) {
         const err = new Error('The `folderId` is not valid');
         err.status = 400;
         return Promise.reject(err);
       }
+    })
+    .catch(err => {
+      console.error(err);
     });
 }
 
 function validateTagIds(tags, userId) {
+  // console.log(`UserId: ${userId}'s tags: `, tags);
   if (tags === undefined) { // If tags is undefined, there are no tags and resolve the Promise.
     return Promise.resolve();
   }
@@ -36,20 +43,27 @@ function validateTagIds(tags, userId) {
     return Promise.reject(err);
   }
 
+  tags.forEach(tag => {
+    // console.log('---VT', tag.id, "Valid?:", mongoose.Types.ObjectId.isValid(tag.id), '---');
+    if (!mongoose.Types.ObjectId.isValid(tag._id)) {
+      const err = new Error('The `tagId` is not valid');
+      err.status = 400;
+      return Promise.reject(err);
+    }
+  });
+  
   
   return Tag.find({ $and: [{ _id: { $in: tags }, userId }] })
     .then(results => {
-      /**
-       * NEED TO CHECK IF THE TAGS EXIST
-       * IF THEY DO, DO NOTHING AND CREATE THE NOTE WITH THE DATA IT HAS
-       * ELSE, CREATE THE TAGS AND PUT THEM IN THE DATABASE BEFORE COMPLETING THE NOTE COMPLETION
-       */
-      console.log('tags', tags);
+      // console.log('validateTags result', results);
       if (tags.length !== results.length) {
         const err = new Error('The `tags` contains an invalid id');
         err.status = 400;
         return Promise.reject(err);
       }
+    })
+    .catch(err => {
+      console.error(err);
     });
 }
 
@@ -117,9 +131,12 @@ router.get('/:id', (req, res, next) => {
 
 /* ========== POST/CREATE AN ITEM ========== */
 router.post('/', (req, res, next) => {
-  const { title, content, folderId, tags } = req.body;
+  console.log('Note req.body', req.body);
+  const { title, content, tags } = req.body;
+  // const folderId = req.body.folderId;
   const userId = req.user.id;
-  const newNote = { title, content, userId, folderId, tags };
+  const newNote = { title, content, userId, /*folderId,*/ tags };
+  // console.log('note post newNote', newNote);
 
   /***** Never trust users - validate input *****/
   if (!title) {
@@ -129,13 +146,14 @@ router.post('/', (req, res, next) => {
   }
 
   Promise.all([
-    validateFolderId(folderId, userId),
+    // validateFolderId(folderId, userId),
     validateTagIds(tags, userId)
   ])
     .then(() => Note.create(newNote))
     .then(result => {
-      console.log('result:', result);
-      res.location(`${req.originalUrl}/${result.id}`).status(201).json(result);
+      console.log('Note POST result:', result);
+      res.json(result);
+      // res.location(`${req.originalUrl}/${result.id}`).status(201).json(result);
     })
     .catch(err => {
       if (err === 'InvalidFolder') {
