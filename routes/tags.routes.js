@@ -51,21 +51,23 @@ router.get('/:id', (req, res, next) => {
 
 /* ========== POST/CREATE AN ITEM ========== */
 router.post('/', (req, res, next) => {
-  console.log('tag post req.body', req.body);
+  // console.log('tag post req.body', req.body);
   const tagArray = req.body.tags;
   const userId = req.body.userId;
-console.log('tag post tagArray', tagArray)
+  // console.log('tag post tagArray', tagArray)
+  
   /***** Never trust users - validate input *****/
   // if (!name) {
   //   const err = new Error('Missing `name` in request body');
   //   err.status = 400;
   //   return next(err);
   // }
+  
   // console.log('tagArray', tagArray, 'userId', userId);
   let tagPromiseArray = tagArray.map(tag => Tag.create({ userId: userId, name: tag }))
   Promise.all(tagPromiseArray)
     .then(result => {
-      console.log('--------------------', result, '--------------------');
+      // console.log('--------------------', result, '--------------------');
       res.json(result);
       // res.location(`${req.originalUrl}/${result.id}`).status(201).json(result);
     })
