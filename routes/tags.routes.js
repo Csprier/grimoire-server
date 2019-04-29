@@ -51,10 +51,10 @@ router.get('/:id', (req, res, next) => {
 
 /* ========== POST/CREATE AN ITEM ========== */
 router.post('/', (req, res, next) => {
-  // console.log('tag post req.body', req.body);
+  console.log('tag post req.body', req.body);
   const tagArray = req.body.tags;
   const userId = req.body.userId;
-  // console.log('tag post tagArray', tagArray)
+  console.log('tag post tagArray', tagArray)
   
   /***** Never trust users - validate input *****/
   // if (!name) {
