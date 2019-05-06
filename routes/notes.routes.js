@@ -6,22 +6,30 @@ const Note = require('../models/note');
 const Folder = require('../models/folder');
 const Tag = require('../models/tag');
 
-function validateFolderId(folderId, userId) {
-  console.log('ValidateFolderId', folderId);
-  if (folderId === undefined || '') {
+function validateFolderId(folders, userId) {
+  console.log('ValidateFolderId', folders);
+  if (folders === undefined) {
     return Promise.resolve();
   }
 
-  if (!mongoose.Types.ObjectId.isValid(folderId)) {
-    const err = new Error('The `folderId` is not valid');
+  if (!Array.isArray(folders)) {
+    const err = new Error('The `folders` must be an array');
     err.status = 400;
     return Promise.reject(err);
   }
 
-  return Folder.countDocuments({ _id: folderId, userId })
-    .then(count => {
-      if (count === 0) {
-        const err = new Error('The `folderId` is not valid');
+  folders.forEach(folder => {
+    if (!mongoose.Types.ObjectId.isValid(folder._id)) {
+      const err = new Error('The `folderId` is not valid');
+      err.status = 400;
+      return Promise.reject(err);
+    }
+  })
+
+  return Folder.find({ $and: [{ _id: { $in: folders }, userId }] })
+    .then(results => {
+      if (folders.length !== results.length) {
+        const err = new Error('The `folders` contains an invalid id');
         err.status = 400;
         return Promise.reject(err);
       }
@@ -51,7 +59,6 @@ function validateTagIds(tags, userId) {
       return Promise.reject(err);
     }
   });
-  
   
   return Tag.find({ $and: [{ _id: { $in: tags }, userId }] })
     .then(results => {
@@ -133,10 +140,10 @@ router.get('/:id', (req, res, next) => {
 router.post('/', (req, res, next) => {
   console.log('Note req.body', req.body);
   const { title, content, tags } = req.body;
-  // const folderId = req.body.folderId;
+  const folders = req.body.folders;
   const userId = req.user.id;
-  const newNote = { title, content, userId, /*folderId,*/ tags };
-  // console.log('note post newNote', newNote);
+  const newNote = { title, content, userId, folders, tags };
+  console.log('note post newNote', newNote);
 
   /***** Never trust users - validate input *****/
   if (!title) {
@@ -146,7 +153,7 @@ router.post('/', (req, res, next) => {
   }
 
   Promise.all([
-    // validateFolderId(folderId, userId),
+    validateFolderId(folders, userId),
     validateTagIds(tags, userId)
   ])
     .then(() => Note.create(newNote))
