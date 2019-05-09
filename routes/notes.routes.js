@@ -79,7 +79,7 @@ const router = express.Router();
 // Protect endpoints using JWT Strategy
 router.use('/', passport.authenticate('jwt', { session: false, failWithError: true }));
 
-/* ========== GET/READ ALL ITEMS ========== */
+/* ========== GET/READ ALL NOTES ========== */
 router.get('/', (req, res, next) => {
   const { searchTerm, folderId, tagId } = req.query;
   const userId = req.user.id;
@@ -110,7 +110,10 @@ router.get('/', (req, res, next) => {
     });
 });
 
-/* ========== GET/READ A SINGLE ITEM ========== */
+/** ========== GET/READ A SINGLE NOTE BY ID ============================
+* @description GET request router to read a Note by ID.
+* @params {req, res, next}
+*/
 router.get('/:id', (req, res, next) => {
   const { id } = req.params;
   const userId = req.user.id;
@@ -136,7 +139,11 @@ router.get('/:id', (req, res, next) => {
     });
 });
 
-/* ========== POST/CREATE AN ITEM ========== */
+
+/** ========== POST/CREATE A NOTE ============================
+ * @description POST request router to create a Note.
+ * @params {req, res, next}
+ */
 router.post('/', (req, res, next) => {
   console.log('Note req.body', req.body);
   const { title, content, tags } = req.body;
@@ -228,6 +235,7 @@ router.put('/:id', (req, res, next) => {
 });
 
 /* ========== PATCH/UPDATE A SINGLE ITEM ========== */
+/** NEEDS REFACTOR FOR FOLDERS AND OTHER STUFF */
 router.patch('/:id', (req, res, next) => {
   const { id } = req.params;
   const { title, content, folderId, tags } = req.body;
