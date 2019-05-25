@@ -6,22 +6,30 @@ const Note = require('../models/note');
 const Folder = require('../models/folder');
 const Tag = require('../models/tag');
 
-function validateFolderId(folderId, userId) {
-  console.log('ValidateFolderId', folderId);
-  if (folderId === undefined || '') {
+function validateFolderId(folders, userId) {
+  console.log('ValidateFolderId', folders);
+  if (folders === undefined) {
     return Promise.resolve();
   }
 
-  if (!mongoose.Types.ObjectId.isValid(folderId)) {
-    const err = new Error('The `folderId` is not valid');
+  if (!Array.isArray(folders)) {
+    const err = new Error('The `folders` must be an array');
     err.status = 400;
     return Promise.reject(err);
   }
 
-  return Folder.countDocuments({ _id: folderId, userId })
-    .then(count => {
-      if (count === 0) {
-        const err = new Error('The `folderId` is not valid');
+  folders.forEach(folder => {
+    if (!mongoose.Types.ObjectId.isValid(folder._id)) {
+      const err = new Error('The `folderId` is not valid');
+      err.status = 400;
+      return Promise.reject(err);
+    }
+  })
+
+  return Folder.find({ $and: [{ _id: { $in: folders }, userId }] })
+    .then(results => {
+      if (folders.length !== results.length) {
+        const err = new Error('The `folders` contains an invalid id');
         err.status = 400;
         return Promise.reject(err);
       }
@@ -52,7 +60,6 @@ function validateTagIds(tags, userId) {
     }
   });
   
-  
   return Tag.find({ $and: [{ _id: { $in: tags }, userId }] })
     .then(results => {
       // console.log('validateTags result', results);
@@ -72,7 +79,7 @@ const router = express.Router();
 // Protect endpoints using JWT Strategy
 router.use('/', passport.authenticate('jwt', { session: false, failWithError: true }));
 
-/* ========== GET/READ ALL ITEMS ========== */
+/* ========== GET/READ ALL NOTES ========== */
 router.get('/', (req, res, next) => {
   const { searchTerm, folderId, tagId } = req.query;
   const userId = req.user.id;
@@ -103,7 +110,10 @@ router.get('/', (req, res, next) => {
     });
 });
 
-/* ========== GET/READ A SINGLE ITEM ========== */
+/** ========== GET/READ A SINGLE NOTE BY ID ============================
+* @description GET request router to read a Note by ID.
+* @params {req, res, next}
+*/
 router.get('/:id', (req, res, next) => {
   const { id } = req.params;
   const userId = req.user.id;
@@ -129,14 +139,18 @@ router.get('/:id', (req, res, next) => {
     });
 });
 
-/* ========== POST/CREATE AN ITEM ========== */
+
+/** ========== POST/CREATE A NOTE ============================
+ * @description POST request router to create a Note.
+ * @params {req, res, next}
+ */
 router.post('/', (req, res, next) => {
   console.log('Note req.body', req.body);
   const { title, content, tags } = req.body;
-  // const folderId = req.body.folderId;
+  const folders = req.body.folders;
   const userId = req.user.id;
-  const newNote = { title, content, userId, /*folderId,*/ tags };
-  // console.log('note post newNote', newNote);
+  const newNote = { title, content, userId, folders, tags };
+  console.log('note post newNote', newNote);
 
   /***** Never trust users - validate input *****/
   if (!title) {
@@ -146,7 +160,7 @@ router.post('/', (req, res, next) => {
   }
 
   Promise.all([
-    // validateFolderId(folderId, userId),
+    validateFolderId(folders, userId),
     validateTagIds(tags, userId)
   ])
     .then(() => Note.create(newNote))
@@ -221,6 +235,7 @@ router.put('/:id', (req, res, next) => {
 });
 
 /* ========== PATCH/UPDATE A SINGLE ITEM ========== */
+/** NEEDS REFACTOR FOR FOLDERS AND OTHER STUFF */
 router.patch('/:id', (req, res, next) => {
   const { id } = req.params;
   const { title, content, folderId, tags } = req.body;

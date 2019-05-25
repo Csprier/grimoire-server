@@ -2,7 +2,8 @@ const mongoose = require('mongoose');
 
 const folderSchema = new mongoose.Schema({
   name: { type: String, required: true/* , unique: true */ },
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  noteId: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Note' }]
 }, { timestamps: true });
 
 folderSchema.index({ name: 1, userId: 1 }, { unique: true });

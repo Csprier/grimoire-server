@@ -50,20 +50,14 @@ router.get('/:id', (req, res, next) => {
 
 /* ========== POST/CREATE AN ITEM ========== */
 router.post('/', (req, res, next) => {
-  const { name } = req.body;
-  const userId = req.user.id;
+  console.log('folder post req.body', req.body);
+  const folderArray = req.body.folders;
+  const userId = req.userId;
 
-  const newFolder = { name, userId };
-
-  if (!name) {
-    const err = new Error('Missing `name` in request body');
-    err.status = 400;
-    return next(err);
-  }
-
-  Folder.create(newFolder)
+  let folderPromiseArray = folderArray.map(folder => Folder.create({ userId: userId, name: folder }))
+  Promise.all(folderPromiseArray)
     .then(result => {
-      res.location(`${req.originalUrl}/${result.id}`).status(201).json(result);
+      res.json(result);
     })
     .catch(err => {
       if (err.code === 11000) {
