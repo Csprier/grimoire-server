@@ -53,20 +53,11 @@ router.post('/', (req, res, next) => {
   console.log('folder post req.body', req.body);
   const folderArray = req.body.folders;
   const userId = req.userId;
-  console.log('folder post folderArray', folderArray);
-
-  // if (!name) {
-  //   const err = new Error('Missing `name` in request body');
-  //   err.status = 400;
-  //   return next(err);
-  // }
 
   let folderPromiseArray = folderArray.map(folder => Folder.create({ userId: userId, name: folder }))
   Promise.all(folderPromiseArray)
     .then(result => {
-      console.log('-----------', result, '-----------');
       res.json(result);
-      // res.location(`${req.originalUrl}/${result.id}`).status(201).json(result);
     })
     .catch(err => {
       if (err.code === 11000) {
