@@ -54,7 +54,7 @@ router.post('/', (req, res, next) => {
   console.log('tag post req.body', req.body);
   const tagArray = req.body.tags;
   const userId = req.body.userId;
-  
+  console.log('TAGARRAY', tagArray);
   let tagPromiseArray = tagArray.map(tag => Tag.create({ userId: userId, name: tag }))
   Promise.all(tagPromiseArray)
     .then(result => {

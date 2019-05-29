@@ -6,8 +6,7 @@ const Note = require('../models/note');
 const Folder = require('../models/folder');
 const Tag = require('../models/tag');
 
-function validateFolderId(folders, userId) {
-  console.log('ValidateFolderId', folders);
+function validateFolderIds(folders, userId) {
   if (folders === undefined) {
     return Promise.resolve();
   }
@@ -20,7 +19,7 @@ function validateFolderId(folders, userId) {
 
   folders.forEach(folder => {
     if (!mongoose.Types.ObjectId.isValid(folder._id)) {
-      const err = new Error('The `folderId` is not valid');
+      const err = new Error('The `folder._id` is not valid');
       err.status = 400;
       return Promise.reject(err);
     }
@@ -28,6 +27,7 @@ function validateFolderId(folders, userId) {
 
   return Folder.find({ $and: [{ _id: { $in: folders }, userId }] })
     .then(results => {
+      console.log('ValidateFolders results', results);
       if (folders.length !== results.length) {
         const err = new Error('The `folders` contains an invalid id');
         err.status = 400;
@@ -40,7 +40,6 @@ function validateFolderId(folders, userId) {
 }
 
 function validateTagIds(tags, userId) {
-  // console.log(`UserId: ${userId}'s tags: `, tags);
   if (tags === undefined) { // If tags is undefined, there are no tags and resolve the Promise.
     return Promise.resolve();
   }
@@ -52,9 +51,9 @@ function validateTagIds(tags, userId) {
   }
 
   tags.forEach(tag => {
-    // console.log('---VT', tag.id, "Valid?:", mongoose.Types.ObjectId.isValid(tag.id), '---');
     if (!mongoose.Types.ObjectId.isValid(tag._id)) {
-      const err = new Error('The `tagId` is not valid');
+      console.log('Validate Tag ObjectId issue with:', tag);
+      const err = new Error('The `tag._id` is not valid');
       err.status = 400;
       return Promise.reject(err);
     }
@@ -62,7 +61,7 @@ function validateTagIds(tags, userId) {
   
   return Tag.find({ $and: [{ _id: { $in: tags }, userId }] })
     .then(results => {
-      // console.log('validateTags result', results);
+      console.log('validateTags result', results);
       if (tags.length !== results.length) {
         const err = new Error('The `tags` contains an invalid id');
         err.status = 400;
@@ -101,8 +100,10 @@ router.get('/', (req, res, next) => {
 
   Note.find(filter)
     .populate('tags')
+    .populate('folders')
     .sort({ 'updatedAt': 'desc' })
     .then(results => {
+      console.log('Note GET results: ', results);
       res.json(results);
     })
     .catch(err => {
@@ -146,11 +147,9 @@ router.get('/:id', (req, res, next) => {
  */
 router.post('/', (req, res, next) => {
   console.log('Note req.body', req.body);
-  const { title, content, tags } = req.body;
-  const folders = req.body.folders;
+  const { title, content, tags, folders } = req.body;
   const userId = req.user.id;
   const newNote = { title, content, userId, folders, tags };
-  console.log('note post newNote', newNote);
 
   /***** Never trust users - validate input *****/
   if (!title) {
@@ -158,16 +157,15 @@ router.post('/', (req, res, next) => {
     err.status = 400;
     return next(err);
   }
-
+  console.log('NOTE POST PRE-VALIDATION', newNote);
   Promise.all([
-    validateFolderId(folders, userId),
-    validateTagIds(tags, userId)
+    validateTagIds(tags, userId),
+    validateFolderIds(folders, userId)
   ])
     .then(() => Note.create(newNote))
     .then(result => {
       console.log('Note POST result:', result);
       res.json(result);
-      // res.location(`${req.originalUrl}/${result.id}`).status(201).json(result);
     })
     .catch(err => {
       if (err === 'InvalidFolder') {
@@ -207,7 +205,7 @@ router.put('/:id', (req, res, next) => {
   }
 
   Promise.all([
-    validateFolderId(folderId, userId),
+    validateFolderIds(folderId, userId),
     validateTagIds(tags, userId)
   ])
     .then(() => {
