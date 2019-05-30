@@ -6,6 +6,16 @@ const Note = require('../models/note');
 const Folder = require('../models/folder');
 const Tag = require('../models/tag');
 
+function createNonExistingFolders(folders) {
+  let preExistingFolders = folders.filter(folder => folder._id),
+      foldersThatNeedToBeMade = folders.filter(folder => !folder._id),
+      finalizedFolders = [];
+  let folderPromiseArray = Folder.create(foldersThatNeedToBeMade).then(res => {
+    finalizedFolders = preExistingFolders.concat(res);
+    return finalizedFolders;
+  });
+  return folderPromiseArray;
+}
 function validateFolderIds(folders, userId) {
   if (folders === undefined) {
     return Promise.resolve();
@@ -19,15 +29,14 @@ function validateFolderIds(folders, userId) {
 
   folders.forEach(folder => {
     if (!mongoose.Types.ObjectId.isValid(folder._id)) {
-      const err = new Error('The `folder._id` is not valid');
+      const err = new Error('The `folder._id` is not valid.');
       err.status = 400;
       return Promise.reject(err);
     }
-  })
+  });
 
   return Folder.find({ $and: [{ _id: { $in: folders }, userId }] })
     .then(results => {
-      console.log('ValidateFolders results', results);
       if (folders.length !== results.length) {
         const err = new Error('The `folders` contains an invalid id');
         err.status = 400;
@@ -37,6 +46,21 @@ function validateFolderIds(folders, userId) {
     .catch(err => {
       console.error(err);
     });
+}
+
+/**
+ * @description Creates tags that do not exist in the database, asynchronously...
+ * @param {*} tags 
+ */
+function createNonExistingTags(tags) {
+  let preExistingTags = tags.filter(tag => tag._id);
+  let tagsThatNeedToBeMade = tags.filter(tag => !tag._id);
+  let finalizedTags = [];
+  let tagPromiseArray = Tag.create(tagsThatNeedToBeMade).then(res => {
+    finalizedTags = preExistingTags.concat(res);
+    return finalizedTags;
+  });
+  return tagPromiseArray;
 }
 
 function validateTagIds(tags, userId) {
@@ -51,23 +75,16 @@ function validateTagIds(tags, userId) {
   }
 
   tags.forEach(tag => {
-    console.log('VT:', tag);
-    if (!tag.hasOwnProperty('_id')) {
-      return Tag.create([tag])
-        .then(res => res.json(res));
-    } else {
-      return tag;
+    if (!mongoose.Types.ObjectId.isValid(tag._id)) {
+      const err = new Error('The `tag._id` is not valid.');
+      err.status = 400;
+      return Promise.reject(err);
     }
-    // if (!mongoose.Types.ObjectId.isValid(tag._id)) {
-    //   const err = new Error('The `tag._id` is not valid');
-    //   err.status = 400;
-    //   return Promise.reject(err);
-    // }
   });
   
   return Tag.find({ $and: [{ _id: { $in: tags }, userId }] })
     .then(results => {
-      // console.log('validateTags result', results);
+      console.log('VALIDATE TAG results:', results);
       if (tags.length !== results.length) {
         const err = new Error('The `tags` contains an invalid id');
         err.status = 400;
@@ -78,6 +95,8 @@ function validateTagIds(tags, userId) {
       console.error(err);
     });
 }
+
+
 
 const router = express.Router();
 
@@ -153,7 +172,7 @@ router.get('/:id', (req, res, next) => {
 router.post('/', (req, res, next) => {
   const { title, content, tags, folders } = req.body;
   const userId = req.user.id;
-  const newNote = { title, content, userId, folders, tags };
+  // const newNote = { title, content, userId, folders, tags };
 
   /***** Never trust users - validate input *****/
   if (!title) {
@@ -161,24 +180,32 @@ router.post('/', (req, res, next) => {
     err.status = 400;
     return next(err);
   }
+
   Promise.all([
-    validateTagIds(tags, userId),
-    validateFolderIds(folders, userId)
+    createNonExistingTags(tags, userId),
+    createNonExistingFolders(folders, userId),
+    // validateTagIds(tags, userId),
+    // validateFolderIds(folders, userId)
   ])
-    .then(() => Note.create(newNote))
+    .then((values) => {
+      console.log('VALUES', values);
+      let tagValues = values[0];
+      let folderValues = values[1];
+      let newNote = {
+        userId,
+        title,
+        content,
+        tags: tagValues,
+        folders: folderValues
+      }
+      return Note.create(newNote);
+    })
     .then(result => {
       console.log('Note POST result:', result);
       res.json(result);
     })
     .catch(err => {
-      if (err === 'InvalidFolder') {
-        err = new Error('The folder is not valid');
-        err.status = 400;
-      }
-      if (err === 'InvalidTag') {
-        err = new Error('The tag is not valid');
-        err.status = 400;
-      }
+      console.error(err);
       next(err);
     });
 });
