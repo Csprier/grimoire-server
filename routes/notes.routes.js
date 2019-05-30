@@ -51,17 +51,23 @@ function validateTagIds(tags, userId) {
   }
 
   tags.forEach(tag => {
-    if (!mongoose.Types.ObjectId.isValid(tag._id)) {
-      console.log('Validate Tag ObjectId issue with:', tag);
-      const err = new Error('The `tag._id` is not valid');
-      err.status = 400;
-      return Promise.reject(err);
+    console.log('VT:', tag);
+    if (!tag.hasOwnProperty('_id')) {
+      return Tag.create([tag])
+        .then(res => res.json(res));
+    } else {
+      return tag;
     }
+    // if (!mongoose.Types.ObjectId.isValid(tag._id)) {
+    //   const err = new Error('The `tag._id` is not valid');
+    //   err.status = 400;
+    //   return Promise.reject(err);
+    // }
   });
   
   return Tag.find({ $and: [{ _id: { $in: tags }, userId }] })
     .then(results => {
-      console.log('validateTags result', results);
+      // console.log('validateTags result', results);
       if (tags.length !== results.length) {
         const err = new Error('The `tags` contains an invalid id');
         err.status = 400;
@@ -103,7 +109,6 @@ router.get('/', (req, res, next) => {
     .populate('folders')
     .sort({ 'updatedAt': 'desc' })
     .then(results => {
-      console.log('Note GET results: ', results);
       res.json(results);
     })
     .catch(err => {
@@ -146,7 +151,6 @@ router.get('/:id', (req, res, next) => {
  * @params {req, res, next}
  */
 router.post('/', (req, res, next) => {
-  console.log('Note req.body', req.body);
   const { title, content, tags, folders } = req.body;
   const userId = req.user.id;
   const newNote = { title, content, userId, folders, tags };
@@ -157,7 +161,6 @@ router.post('/', (req, res, next) => {
     err.status = 400;
     return next(err);
   }
-  console.log('NOTE POST PRE-VALIDATION', newNote);
   Promise.all([
     validateTagIds(tags, userId),
     validateFolderIds(folders, userId)
