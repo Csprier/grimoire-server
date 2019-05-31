@@ -7,6 +7,16 @@ const Note = require('../models/note');
 
 const router = express.Router();
 
+function createFolders(folders) {
+  let foldersThatNeedToBeCreated = folders;
+  let finalizedFolders = [];
+  let folderPromiseArray = Folder.create(foldersThatNeedToBeCreated)
+    .then(res => {
+      return finalizedFolders.concat(res);
+    });
+  return folderPromiseArray;
+}
+
 // Protect endpoints using JWT Strategy
 router.use('/', passport.authenticate('jwt', { session: false, failWithError: true }));
 
