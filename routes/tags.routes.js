@@ -7,6 +7,16 @@ const Note = require('../models/note');
 
 const router = express.Router();
 
+function createTags(tags) {
+  let tagsThatNeedToBeCreated = tags;
+  let finalizedTags = [];
+  let tagPromiseArray = Tag.create(tagsThatNeedToBeCreated)
+    .then(res => {
+      return finalizedTags.concat(res);
+    });
+  return tagPromiseArray;
+}
+
 // Protect endpoints using JWT Strategy
 router.use('/', passport.authenticate('jwt', { session: false, failWithError: true }));
 
@@ -51,14 +61,14 @@ router.get('/:id', (req, res, next) => {
 
 /* ========== POST/CREATE AN ITEM ========== */
 router.post('/', (req, res, next) => {
-  console.log('tag post req.body', req.body);
-  const tagArray = req.body.tags;
-  const userId = req.body.userId;
-  console.log('TAGARRAY', tagArray);
-  let tagPromiseArray = tagArray.map(tag => Tag.create({ userId: userId, name: tag }))
-  Promise.all(tagPromiseArray)
-    .then(result => {
-      res.json(result);
+  const tagArray = req.body;
+
+  Promise.all([
+    createTags(tagArray)
+  ])
+    .then((values) => {
+      let tagValues = values[0];
+      res.json(tagValues);
     })
     .catch(err => {
       if (err.code === 11000) {
