@@ -60,14 +60,16 @@ router.get('/:id', (req, res, next) => {
 
 /* ========== POST/CREATE AN ITEM ========== */
 router.post('/', (req, res, next) => {
-  console.log('folder post req.body', req.body);
-  const folderArray = req.body.folders;
-  const userId = req.userId;
+  console.log('Folder POST', req.body);
+  const folderArray = req.body;
 
-  let folderPromiseArray = folderArray.map(folder => Folder.create({ userId: userId, name: folder }))
-  Promise.all(folderPromiseArray)
-    .then(result => {
-      res.json(result);
+  Promise.all([
+    createFolders(folderArray)
+  ])
+    .then((values) => {
+      let folderValues = values[0];
+      console.log('folderValues', folderValues);
+      res.json(folderValues);
     })
     .catch(err => {
       if (err.code === 11000) {
