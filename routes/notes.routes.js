@@ -152,6 +152,7 @@ router.get('/:id', (req, res, next) => {
 
   Note.findOne({ _id: id, userId })
     .populate('tags')
+    .populate('folders')
     .then(result => {
       if (result) {
         res.json(result);
