@@ -236,12 +236,15 @@ router.put('/:id', (req, res, next) => {
   }
 
   Promise.all([
-    validateFolderIds(folderId, userId),
-    validateTagIds(tags, userId)
+    createNonExistingTags(tags, userId),
+    createNonExistingFolders(folders, userId),
+    // validateFolderIds(folderId, userId),
+    // validateTagIds(tags, userId)
   ])
     .then(() => {
       return Note.findByIdAndUpdate(id, updateNote, { new: true })
-        .populate('tags');
+        .populate('tags')
+        .populate('folders')
     })
     .then(result => {
       if (result) {
