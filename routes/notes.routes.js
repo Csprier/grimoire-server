@@ -10,10 +10,11 @@ function createNonExistingFolders(folders) {
   let preExistingFolders = folders.filter(folder => folder._id),
       foldersThatNeedToBeMade = folders.filter(folder => !folder._id),
       finalizedFolders = [];
-  let folderPromiseArray = Folder.create(foldersThatNeedToBeMade).then(res => {
-    finalizedFolders = preExistingFolders.concat(res);
-    return finalizedFolders;
-  });
+  let folderPromiseArray = Folder.create(foldersThatNeedToBeMade)
+      .then(res => {
+        finalizedFolders = preExistingFolders.concat(res);
+        return finalizedFolders;
+      });
   return folderPromiseArray;
 }
 function validateFolderIds(folders, userId) {
@@ -56,10 +57,11 @@ function createNonExistingTags(tags) {
   let preExistingTags = tags.filter(tag => tag._id);
   let tagsThatNeedToBeMade = tags.filter(tag => !tag._id);
   let finalizedTags = [];
-  let tagPromiseArray = Tag.create(tagsThatNeedToBeMade).then(res => {
-    finalizedTags = preExistingTags.concat(res);
-    return finalizedTags;
-  });
+  let tagPromiseArray = Tag.create(tagsThatNeedToBeMade)
+    .then(res => {
+      finalizedTags = preExistingTags.concat(res);
+      return finalizedTags;
+    });
   return tagPromiseArray;
 }
 
@@ -213,55 +215,47 @@ router.post('/', (req, res, next) => {
 
 /* ========== PUT/UPDATE A SINGLE ITEM ========== */
 router.put('/:id', (req, res, next) => {
+  // console.log('PUT REQUEST', req.body);
   const { id } = req.params;
-  const { title, content, folderId, tags } = req.body;
+  const { title, content, folders, tags } = req.body;
   const userId = req.user.id;
-  const updateNote = { title, content, userId, folderId, tags };
-
-  /***** Never trust users - validate input *****/
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    const err = new Error('The `id` is not valid');
-    err.status = 400;
-    return next(err);
-  }
-
-  if (!title) {
-    const err = new Error('Missing `title` in request body');
-    err.status = 400;
-    return next(err);
-  }
-
-  if (mongoose.Types.ObjectId.isValid(folderId)) {
-    updateNote.folderId = folderId;
-  }
 
   Promise.all([
     createNonExistingTags(tags, userId),
     createNonExistingFolders(folders, userId),
-    // validateFolderIds(folderId, userId),
-    // validateTagIds(tags, userId)
+    // validateTagIds(tags, userId),
+    // validateFolderIds(folders, userId)
   ])
-    .then(() => {
-      return Note.findByIdAndUpdate(id, updateNote, { new: true })
+    .then((values) => {
+      console.log('--------------- VALUES ---------------');
+      values.map((item, i) => console.log(`${i}: ${item}`));
+      let tagValues = values[0].map(tag => ({ 
+        _id: tag._id.toString(),
+        name: tag.name
+      }));
+      let folderValues = values[1].map(folder => ({ 
+        _id: folder._id.toString(),
+        name: folder.name
+      }));;
+      let updatedNote = {
+        userId,
+        title,
+        content,
+        tags: tagValues,
+        folders: folderValues
+      }
+      console.log('--------------------------------------');
+      console.log('UPDATED NOTE:', updatedNote);
+      return Note.findByIdAndUpdate(id, updatedNote, { new: true })
         .populate('tags')
         .populate('folders')
     })
     .then(result => {
-      if (result) {
-        res.json(result);
-      } else {
-        next();
-      }
+      console.log('Note PUT result:', result);
+      res.json(result);
     })
     .catch(err => {
-      if (err === 'InvalidFolder') {
-        err = new Error('The folder is not valid');
-        err.status = 400;
-      }
-      if (err === 'InvalidTag') {
-        err = new Error('The tag is not valid');
-        err.status = 400;
-      }
+      console.error(err);
       next(err);
     });
 });
