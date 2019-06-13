@@ -228,15 +228,10 @@ router.put('/:id', (req, res, next) => {
   ])
     .then((values) => {
       console.log('--------------- VALUES ---------------');
-      values.map((item, i) => console.log(`${i}: ${item}`));
-      let tagValues = values[0].map(tag => ({ 
-        _id: tag._id.toString(),
-        name: tag.name
-      }));
-      let folderValues = values[1].map(folder => ({ 
-        _id: folder._id.toString(),
-        name: folder.name
-      }));;
+      console.log('Values:', values.map((item, i) => console.log(i, item)));
+      let tagValues = values[0];
+      let folderValues = values[1];
+      
       let updatedNote = {
         userId,
         title,
