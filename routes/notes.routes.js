@@ -12,7 +12,13 @@ function createNonExistingFolders(folders) {
       finalizedFolders = [];
   let folderPromiseArray = Folder.create(foldersThatNeedToBeMade)
       .then(res => {
-        finalizedFolders = preExistingFolders.concat(res);
+        let formattedFolders = res.map(folder => {
+          return {
+            _id: folder.id,
+            name: folder.name
+          }
+        })
+        finalizedFolders = preExistingFolders.concat(formattedFolders);
         return finalizedFolders;
       });
   return folderPromiseArray;
@@ -49,17 +55,19 @@ function validateFolderIds(folders, userId) {
     });
 }
 
-/**
- * @description Creates tags that do not exist in the database, asynchronously...
- * @param {*} tags 
- */
 function createNonExistingTags(tags) {
   let preExistingTags = tags.filter(tag => tag._id);
   let tagsThatNeedToBeMade = tags.filter(tag => !tag._id);
   let finalizedTags = [];
   let tagPromiseArray = Tag.create(tagsThatNeedToBeMade)
     .then(res => {
-      finalizedTags = preExistingTags.concat(res);
+      let formattedTags = res.map(tag => {
+        return {
+          _id: tag.id,
+          name: tag.name
+        }
+      })
+      finalizedTags = preExistingTags.concat(formattedTags);
       return finalizedTags;
     });
   return tagPromiseArray;
@@ -227,8 +235,8 @@ router.put('/:id', (req, res, next) => {
     // validateFolderIds(folders, userId)
   ])
     .then((values) => {
-      console.log('--------------- VALUES ---------------');
-      console.log('Values:', values.map((item, i) => console.log(i, item)));
+      // console.log('--------------- VALUES ---------------');
+      // console.log('Values:', values);
       let tagValues = values[0];
       let folderValues = values[1];
       
@@ -240,8 +248,8 @@ router.put('/:id', (req, res, next) => {
         tags: tagValues,
         folders: folderValues
       }
-      console.log('--------------------------------------');
-      console.log('UPDATED NOTE:', updatedNote);
+      // console.log('--------------------------------------');
+      // console.log('UPDATED NOTE:', updatedNote);
       return Note.findByIdAndUpdate(id, updatedNote, { new: true })
         .populate('tags')
         .populate('folders')
