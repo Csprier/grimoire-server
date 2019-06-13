@@ -7,21 +7,32 @@ const Folder = require('../models/folder');
 const Tag = require('../models/tag');
 
 function createNonExistingFolders(folders) {
-  let preExistingFolders = folders.filter(folder => folder._id),
-      foldersThatNeedToBeMade = folders.filter(folder => !folder._id),
-      finalizedFolders = [];
-  let folderPromiseArray = Folder.create(foldersThatNeedToBeMade)
-      .then(res => {
-        let formattedFolders = res.map(folder => {
-          return {
-            _id: folder.id,
-            name: folder.name
+  if (folders === undefined || folders === []) {
+    return Promise.resolve();
+  }
+
+  if (folders !== undefined || folders !== []) {
+    let preExistingFolders = folders.filter(folder => folder._id),
+        foldersThatNeedToBeMade = folders.filter(folder => !folder._id),
+        finalizedFolders = [];
+    let folderPromiseArray = Folder.create(foldersThatNeedToBeMade)
+        .then(res => {
+          if (res !== undefined) {
+            let formattedFolders = res.map(folder => {
+              return {
+                _id: folder.id,
+                name: folder.name
+              }
+            })
+            finalizedFolders = preExistingFolders.concat(formattedFolders);
+            return finalizedFolders; 
+          } else {
+            finalizedFolders = preExistingFolders;
+            return finalizedFolders;
           }
-        })
-        finalizedFolders = preExistingFolders.concat(formattedFolders);
-        return finalizedFolders;
-      });
-  return folderPromiseArray;
+        });
+    return folderPromiseArray;
+  }
 }
 function validateFolderIds(folders, userId) {
   if (folders === undefined) {
@@ -56,21 +67,32 @@ function validateFolderIds(folders, userId) {
 }
 
 function createNonExistingTags(tags) {
-  let preExistingTags = tags.filter(tag => tag._id);
-  let tagsThatNeedToBeMade = tags.filter(tag => !tag._id);
-  let finalizedTags = [];
-  let tagPromiseArray = Tag.create(tagsThatNeedToBeMade)
-    .then(res => {
-      let formattedTags = res.map(tag => {
-        return {
-          _id: tag.id,
-          name: tag.name
+  if (tags === undefined || tags === []) {
+    return Promise.resolve();
+  }
+
+  if (tags !== undefined || tags !== []) {
+    let preExistingTags = tags.filter(tag => tag._id);
+    let tagsThatNeedToBeMade = tags.filter(tag => !tag._id);
+    let finalizedTags = [];
+    let tagPromiseArray = Tag.create(tagsThatNeedToBeMade)
+      .then(res => {
+        if (res !== undefined) {
+          let formattedTags = res.map(tag => {
+            return {
+              _id: tag.id,
+              name: tag.name
+            }
+          })
+          finalizedTags = preExistingTags.concat(formattedTags);
+          return finalizedTags;  
+        } else {
+          finalizedTags = preExistingTags;
+          return finalizedTags;
         }
-      })
-      finalizedTags = preExistingTags.concat(formattedTags);
-      return finalizedTags;
-    });
-  return tagPromiseArray;
+      });
+    return tagPromiseArray;
+  }
 }
 
 function validateTagIds(tags, userId) {
