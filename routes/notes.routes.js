@@ -234,6 +234,7 @@ router.put('/:id', (req, res, next) => {
       
       let updatedNote = {
         userId,
+        id,
         title,
         content,
         tags: tagValues,
