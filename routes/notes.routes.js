@@ -221,7 +221,7 @@ router.post('/', (req, res, next) => {
     // validateFolderIds(folders, userId)
   ])
     .then((values) => {
-      console.log('VALUES', values);
+      // console.log('VALUES', values);
       let tagValues = values[0];
       let folderValues = values[1];
       let newNote = {
@@ -234,7 +234,7 @@ router.post('/', (req, res, next) => {
       return Note.create(newNote);
     })
     .then(result => {
-      console.log('Note POST result:', result);
+      // console.log('Note POST result:', result);
       res.json(result);
     })
     .catch(err => {
@@ -277,7 +277,7 @@ router.put('/:id', (req, res, next) => {
         .populate('folders')
     })
     .then(result => {
-      console.log('Note PUT result:', result);
+      // console.log('Note PUT result:', result);
       res.json(result);
     })
     .catch(err => {
