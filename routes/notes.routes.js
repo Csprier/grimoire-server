@@ -94,7 +94,6 @@ function createNonExistingTags(tags) {
     return tagPromiseArray;
   }
 }
-
 function validateTagIds(tags, userId) {
   if (tags === undefined) { // If tags is undefined, there are no tags and resolve the Promise.
     return Promise.resolve();
@@ -128,7 +127,25 @@ function validateTagIds(tags, userId) {
     });
 }
 
+function updateFoldersWithNoteIds(noteId, folders) {
+  let foldersOnTheNote = folders;
+  let noteIdToAddToFolderModels = { _id: noteId };
 
+  let addNoteIdToFoldersPromiseArray = foldersOnTheNote.map(folder => {
+    let folderId = folder;
+    console.log('Folder Id:', folderId);
+    Folder.findByIdAndUpdate(
+      folderId, 
+      { 
+        $push: { "noteIds": noteIdToAddToFolderModels }
+      }, 
+      { new: true, upsert: true },
+      function(err, model) {
+        console.log(err);
+      })
+  });
+  return addNoteIdToFoldersPromiseArray;
+}
 
 const router = express.Router();
 
@@ -234,7 +251,10 @@ router.post('/', (req, res, next) => {
       return Note.create(newNote);
     })
     .then(result => {
-      // console.log('Note POST result:', result);
+      console.log('Note POST result:', result);
+      let noteIdForFolder = result._id;
+      console.log('NOTE ID:', noteIdForFolder);
+      updateFoldersWithNoteIds(noteIdForFolder, result.folders);
       res.json(result);
     })
     .catch(err => {
