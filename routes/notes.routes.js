@@ -251,10 +251,10 @@ router.post('/', (req, res, next) => {
       return Note.create(newNote);
     })
     .then(result => {
-      console.log('Note POST result:', result);
-      let noteIdForFolder = result._id;
-      console.log('NOTE ID:', noteIdForFolder);
-      updateFoldersWithNoteIds(noteIdForFolder, result.folders);
+      // console.log('Note POST result:', result);
+      // let noteIdForFolder = result._id;
+      // console.log('NOTE ID:', noteIdForFolder);
+      // updateFoldersWithNoteIds(noteIdForFolder, result.folders);
       res.json(result);
     })
     .catch(err => {
@@ -298,6 +298,8 @@ router.put('/:id', (req, res, next) => {
     })
     .then(result => {
       // console.log('Note PUT result:', result);
+      // let noteIdForFolder = result._id;
+      // updateFoldersWithNoteIds(noteIdForFolder, result.folders);
       res.json(result);
     })
     .catch(err => {
