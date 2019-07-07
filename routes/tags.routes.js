@@ -80,7 +80,6 @@ router.post('/', (req, res, next) => {
 
 /* ========== PUT/UPDATE A SINGLE ITEM ========== */
 router.put('/:id', (req, res, next) => {
-  console.log(req.params);
   const { _id } = req.params;
   const { name } = req.body;
   const userId = req.user.id;
