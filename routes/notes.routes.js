@@ -115,7 +115,6 @@ function validateTagIds(tags, userId) {
   
   return Tag.find({ $and: [{ _id: { $in: tags }, userId }] })
     .then(results => {
-      console.log('VALIDATE TAG results:', results);
       if (tags.length !== results.length) {
         const err = new Error('The `tags` contains an invalid id');
         err.status = 400;
@@ -238,7 +237,6 @@ router.post('/', (req, res, next) => {
     // validateFolderIds(folders, userId)
   ])
     .then((values) => {
-      // console.log('VALUES', values);
       let tagValues = values[0];
       let folderValues = values[1];
       let newNote = {
@@ -251,10 +249,6 @@ router.post('/', (req, res, next) => {
       return Note.create(newNote);
     })
     .then(result => {
-      // console.log('Note POST result:', result);
-      // let noteIdForFolder = result._id;
-      // console.log('NOTE ID:', noteIdForFolder);
-      // updateFoldersWithNoteIds(noteIdForFolder, result.folders);
       res.json(result);
     })
     .catch(err => {
@@ -265,7 +259,6 @@ router.post('/', (req, res, next) => {
 
 /* ========== PUT/UPDATE A SINGLE ITEM ========== */
 router.put('/:id', (req, res, next) => {
-  // console.log('PUT REQUEST', req.body);
   const { id } = req.params;
   const { title, content, folders, tags } = req.body;
   const userId = req.user.id;
@@ -277,8 +270,6 @@ router.put('/:id', (req, res, next) => {
     // validateFolderIds(folders, userId)
   ])
     .then((values) => {
-      // console.log('--------------- VALUES ---------------');
-      // console.log('Values:', values);
       let tagValues = values[0];
       let folderValues = values[1];
       
@@ -290,16 +281,11 @@ router.put('/:id', (req, res, next) => {
         tags: tagValues,
         folders: folderValues
       }
-      // console.log('--------------------------------------');
-      // console.log('UPDATED NOTE:', updatedNote);
       return Note.findByIdAndUpdate(id, updatedNote, { new: true })
         .populate('tags')
         .populate('folders')
     })
     .then(result => {
-      // console.log('Note PUT result:', result);
-      // let noteIdForFolder = result._id;
-      // updateFoldersWithNoteIds(noteIdForFolder, result.folders);
       res.json(result);
     })
     .catch(err => {

@@ -60,7 +60,6 @@ router.get('/:id', (req, res, next) => {
 
 /* ========== POST/CREATE AN ITEM ========== */
 router.post('/', (req, res, next) => {
-  console.log('Folder POST', req.body);
   const folderArray = req.body;
 
   Promise.all([
@@ -68,7 +67,6 @@ router.post('/', (req, res, next) => {
   ])
     .then((values) => {
       let folderValues = values[0];
-      console.log('folderValues', folderValues);
       res.json(folderValues);
     })
     .catch(err => {
