@@ -81,7 +81,6 @@ if (require.main === module) {
     })
     .catch(err => {
       console.error(`ERROR: ${err.message}`);
-      console.log(`MONGODB_URI: ${MONGODB_URI}`);
       console.error('\n === Did you remember to start `mongod`? === \n');
       console.error(err);
     });
