@@ -74,7 +74,11 @@ app.use(function (err, req, res, next) {
 // ===============================================================================================
 // Listen for incoming connections
 if (require.main === module) {
-  mongoose.connect(MONGODB_URI)
+  const options = {
+    useNewUrlParser: true
+  }
+  
+  mongoose.connect(MONGODB_URI, options)
     .then(instance => {
       const conn = instance.connections[0];
       console.info(`Connected to: mongodb://${conn.host}:${conn.port}/${conn.name}`);
