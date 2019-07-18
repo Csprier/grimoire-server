@@ -74,14 +74,14 @@ app.use(function (err, req, res, next) {
 // ===============================================================================================
 // Listen for incoming connections
 if (require.main === module) {
-  mongoose.connect(process.env.MONGODB_URI)
+  mongoose.connect(MONGODB_URI || process.env.MONGODB_URI)
     .then(instance => {
       const conn = instance.connections[0];
       console.info(`Connected to: mongodb://${conn.host}:${conn.port}/${conn.name}`);
     })
     .catch(err => {
-      console.error(err);
       console.error(`ERROR: ${err.message}`);
+      console.log(`MONGODB_URI: ${MONGODB_URI}`);
       console.error('\n === Did you remember to start `mongod`? === \n');
       console.error(err);
     });
