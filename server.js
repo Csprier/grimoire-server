@@ -56,7 +56,7 @@ app.use('/api/auth', authRouter);
 // Catch-all 404
 app.use(function (req, res, next) {
   const err = new Error('Not Found, something broke!');
-  err.status = 404;
+  // err.status = 404;
   next(err);
 });
 
