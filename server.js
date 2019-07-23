@@ -55,6 +55,8 @@ app.use('/api/auth', authRouter);
 // ===============================================================================================
 // Catch-all 404
 app.use(function (req, res, next) {
+  console.error('req', req);
+  console.error('res', res);
   const err = new Error('Not Found');
   err.status = 404;
   next(err);
