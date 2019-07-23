@@ -63,14 +63,13 @@ app.use('/api/auth', authRouter);
 // ===============================================================================================
 // Catch-all Error handler
 // Add NODE_ENV check to prevent stacktrace leak
-app.use(function (err, req, res, next) {
-  console.error('ERROR', err);
-  res.status(err.status || 500);
-  res.json({
-    message: err.message,
-    error: app.get('env') === 'development' ? err : {}
-  });
-});
+// app.use(function (err, req, res, next) {
+//   res.status(err.status || 500);
+//   res.json({
+//     message: err.message,
+//     error: app.get('env') === 'development' ? err : {}
+//   });
+// });
 
 // ===============================================================================================
 // Listen for incoming connections
