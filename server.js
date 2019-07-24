@@ -55,6 +55,11 @@ app.use('/api/auth', authRouter);
 
 app.get('/', function (req, res) {
   res.send('hello world');
+});
+
+// QUERY A COLLECTION
+app.get('/users', function (req, res) {
+  res.send(res);
 })
 
 // ===============================================================================================
