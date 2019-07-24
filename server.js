@@ -52,6 +52,11 @@ app.use('/api/tags', tagsRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/auth', authRouter);
 
+
+app.get('/', function (req, res) {
+  res.send('hello world');
+})
+
 // ===============================================================================================
 // Catch-all 404
 app.use(function (req, res, next) {
