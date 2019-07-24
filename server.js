@@ -58,7 +58,7 @@ app.get('/', function (req, res) {
 });
 
 // QUERY A COLLECTION
-app.get('/users', function (req, res) {
+app.get('/api/users', function (req, res) {
   res.send(res);
 })
 
