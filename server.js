@@ -33,10 +33,8 @@ app.use(morgan(process.env.NODE_ENV === 'development' ? 'dev' : 'common', {
 // ===============================================================================================
 // CORS
 app.use(
-  cors({ 
-    origin: CLIENT_ORIGIN 
-  }
-));
+  cors({ origin: CLIENT_ORIGIN })
+);
 app.use(function(req, res, next) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
