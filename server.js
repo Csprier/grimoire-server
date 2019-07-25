@@ -38,7 +38,7 @@ app.use(
   }
 ));
 app.use(function(req, res, next) {
-  res.headers("Access-Control-Allow-Origin", CLIENT_ORIGIN);
+  res.headers("Access-Control-Allow-Origin", '*');
   res.headers("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
   next();
 });
