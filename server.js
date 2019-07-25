@@ -60,7 +60,7 @@ app.get('/', function (req, res) {
 // QUERY A COLLECTION
 app.get('/api/users', function (req, res) {
   res.send(res);
-})
+});
 
 // ===============================================================================================
 // Catch-all 404
