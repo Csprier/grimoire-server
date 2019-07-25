@@ -32,7 +32,16 @@ app.use(morgan(process.env.NODE_ENV === 'development' ? 'dev' : 'common', {
 
 // ===============================================================================================
 // CORS
-app.use(cors({ origin: CLIENT_ORIGIN }));
+app.use(
+  cors({ 
+    origin: CLIENT_ORIGIN 
+  }
+));
+app.use(function(req, res, next) {
+  res.headers("Access-Control-Allow-Origin", CLIENT_ORIGIN);
+  res.headers("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
 app.options('*', cors());
 
 // ===============================================================================================
