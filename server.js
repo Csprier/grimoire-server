@@ -38,8 +38,9 @@ app.use(
   }
 ));
 app.use(function(req, res, next) {
-  res.headers("Access-Control-Allow-Origin", '*');
+  res.headers("Access-Control-Allow-Origin", "*");
   res.headers("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  res.headers("Access-Control-Allow-Methods", "*");
   next();
 });
 app.options('*', cors());
