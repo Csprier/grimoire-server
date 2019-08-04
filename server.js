@@ -113,6 +113,7 @@ if (require.main === module) {
 
   app.listen(PORT, function () {
     console.info(`Server listening on ${this.address().port}`);
+    console.log('process.env.NODE_ENV', process.env.NODE_ENV);
   }).on('error', err => {
     console.error(err);
   });
