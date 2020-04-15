@@ -85,7 +85,6 @@ app.use(function (req, res, next) {
 // Add NODE_ENV check to prevent stacktrace leak
 app.use(function (err, req, res, next) {
   console.error('ERROR', err);
-  // res.status(err.status || 500);
   res.status(err.status);
   res.json({
     message: err.message,
@@ -93,13 +92,9 @@ app.use(function (err, req, res, next) {
   });
 });
 
-// ===============================================================================================
-// Listen for incoming connections
-if (require.main === module) {
-  const options = {
-    useNewUrlParser: true
-  }
-  
+runMongoDbServer = (MONGODB_URI) => {
+  const options = { useNewUrlParser: true };
+
   mongoose.connect(MONGODB_URI, options)
     .then(instance => {
       const conn = instance.connections[0];
@@ -110,12 +105,21 @@ if (require.main === module) {
       console.error('\n === Did you remember to start `mongod`? === \n');
       console.error(err);
     });
+}
 
+runHttpServer = (PORT) => {
   app.listen(PORT, function () {
     console.info(`Server listening on ${this.address().port}`);
   }).on('error', err => {
     console.error(err);
   });
+}
+
+// ===============================================================================================
+// Listen for incoming connections
+if (require.main === module) {
+  runMongoDbServer(MONGODB_URI);
+  runHttpServer(PORT);
 }
 
 module.exports = app;
