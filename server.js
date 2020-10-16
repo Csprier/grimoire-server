@@ -93,8 +93,11 @@ app.use(function (err, req, res, next) {
 });
 
 runMongoDbServer = (MONGODB_URI) => {
-  const options = { useNewUrlParser: true };
-
+  const options = { 
+    useUnifiedTopology: true,
+    useNewUrlParser: true,
+    useCreateIndex: true
+  }
   mongoose.connect(MONGODB_URI, options)
     .then(instance => {
       const conn = instance.connections[0];

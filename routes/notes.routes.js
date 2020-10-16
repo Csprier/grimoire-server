@@ -286,6 +286,7 @@ router.put('/:id', (req, res, next) => {
         .populate('folders')
     })
     .then(result => {
+      console.log('PUT result', result);
       res.json(result);
     })
     .catch(err => {
