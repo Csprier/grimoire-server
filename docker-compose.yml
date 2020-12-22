@@ -1,0 +1,22 @@
+version: '3.8'
+services:
+  nodejs:
+    image: nodejs_mongo_docker
+    build: .
+    environment: 
+      NODE_ENV: development
+    ports:
+      - 8080:8080
+    volumes:
+      - .:/mnt/c/Users/cspri/Desktop/grimoire/grimoire-server
+  mongodb:
+    image: mongo:latest
+    container_name: db
+    ports: 
+      - 27017:27107
+    volumes:
+      - data:/data/db
+
+volumes:
+  data:
+     

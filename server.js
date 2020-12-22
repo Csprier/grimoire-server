@@ -95,7 +95,7 @@ app.use(function (err, req, res, next) {
 runMongoDbServer = (MONGODB_URI) => {
   const options = { useNewUrlParser: true };
 
-  mongoose.connect(MONGODB_URI, options)
+  mongoose.connect('mongodb://mongodb:27017/grimoire', options)
     .then(instance => {
       const conn = instance.connections[0];
       console.info(`Connected to: mongodb://${conn.host}:${conn.port}/${conn.name}`);
@@ -103,7 +103,7 @@ runMongoDbServer = (MONGODB_URI) => {
     .catch(err => {
       console.error(`ERROR: ${err.message}`);
       console.error('\n === Did you remember to start `mongod`? === \n');
-      console.error(err);
+      console.error('error', err);
     });
 }
 
